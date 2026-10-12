@@ -1,11 +1,15 @@
 import type { ReactNode } from 'react'
 import type { AppView } from '../types/achievement'
+import type { ThemeMode } from '../hooks/useTheme'
+import { ThemeToggle } from './ThemeToggle'
 
 interface LayoutProps {
   view: AppView
   onNavigate: (view: AppView) => void
   children: ReactNode
   storageWarning?: string | null
+  theme: ThemeMode
+  onToggleTheme: () => void
 }
 
 const NAV_ITEMS: { view: AppView; label: string }[] = [
@@ -20,6 +24,8 @@ export function Layout({
   onNavigate,
   children,
   storageWarning,
+  theme,
+  onToggleTheme,
 }: LayoutProps) {
   const activeNav =
     view === 'create' || view === 'edit' ? 'journal' : view
@@ -40,21 +46,24 @@ export function Layout({
             <span className="brand-tagline">Your wins, remembered.</span>
           </button>
         </div>
-        <nav className="site-nav" aria-label="Primary">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.view}
-              type="button"
-              className={
-                activeNav === item.view ? 'nav-link is-active' : 'nav-link'
-              }
-              aria-current={activeNav === item.view ? 'page' : undefined}
-              onClick={() => onNavigate(item.view)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
+        <div className="header-tools">
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          <nav className="site-nav" aria-label="Primary">
+            {NAV_ITEMS.map((item) => (
+              <button
+                key={item.view}
+                type="button"
+                className={
+                  activeNav === item.view ? 'nav-link is-active' : 'nav-link'
+                }
+                aria-current={activeNav === item.view ? 'page' : undefined}
+                onClick={() => onNavigate(item.view)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        </div>
       </header>
 
       {storageWarning ? (

@@ -1,5 +1,6 @@
 import type { Achievement } from '../types/achievement'
 import { formatDisplayDate } from '../lib/dates'
+import { DeleteIcon, EditIcon, IconButton } from './IconButton'
 
 interface AchievementCardProps {
   achievement: Achievement
@@ -30,22 +31,21 @@ export function AchievementCard({
         {(onEdit || onDelete) && (
           <div className="achievement-actions">
             {onEdit ? (
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
+              <IconButton
+                label={`Edit ${achievement.title}`}
                 onClick={() => onEdit(achievement.id)}
               >
-                Edit
-              </button>
+                <EditIcon />
+              </IconButton>
             ) : null}
             {onDelete ? (
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
+              <IconButton
+                label={`Delete ${achievement.title}`}
+                tone="danger"
                 onClick={() => onDelete(achievement.id)}
               >
-                Delete
-              </button>
+                <DeleteIcon />
+              </IconButton>
             ) : null}
           </div>
         )}
