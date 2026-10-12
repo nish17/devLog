@@ -5,6 +5,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog'
 import { buildBackupEnvelope } from '../lib/storage'
 import { parseBackupPayload } from '../lib/validation'
 import { journalToMarkdown } from '../lib/markdown'
+import { journalToObsidianMarkdown } from '../lib/obsidian'
 import { downloadTextFile, stampFilename } from '../lib/download'
 
 interface BackupsProps {
@@ -59,6 +60,29 @@ export function Backups({ achievements, onReplaceAll }: BackupsProps) {
       })
     } catch {
       setMessage({ tone: 'error', text: 'Could not export Markdown journal.' })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const exportObsidian = () => {
+    setBusy(true)
+    try {
+      const md = journalToObsidianMarkdown(achievements)
+      downloadTextFile(
+        stampFilename('devlog-obsidian', 'md'),
+        md,
+        'text/markdown;charset=utf-8',
+      )
+      setMessage({
+        tone: 'success',
+        text: `Exported ${achievements.length} achievement${achievements.length === 1 ? '' : 's'} as Obsidian Markdown.`,
+      })
+    } catch {
+      setMessage({
+        tone: 'error',
+        text: 'Could not export Obsidian Markdown.',
+      })
     } finally {
       setBusy(false)
     }
@@ -190,7 +214,19 @@ export function Backups({ achievements, onReplaceAll }: BackupsProps) {
           >
             Download Markdown journal
           </button>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={exportObsidian}
+            disabled={busy}
+          >
+            Download Obsidian Markdown
+          </button>
         </div>
+        <p className="field-hint export-hint">
+          Obsidian export uses YAML frontmatter, category tags, and wikilink-safe
+          headings for a vault-friendly journal note.
+        </p>
       </section>
 
       <section className="panel" aria-labelledby="import-heading">

@@ -8,9 +8,11 @@ import { Journal } from './pages/Journal'
 import { ReviewMode } from './pages/ReviewMode'
 import { Backups } from './pages/Backups'
 import { useAchievements } from './hooks/useAchievements'
+import { useTheme } from './hooks/useTheme'
 
 function App() {
   const store = useAchievements()
+  const { theme, toggleTheme } = useTheme()
   const [view, setView] = useState<AppView>('dashboard')
   const [editingId, setEditingId] = useState<string | null>(null)
 
@@ -49,6 +51,8 @@ function App() {
       storageWarning={
         !store.storage.available ? store.storage.reason : null
       }
+      theme={theme}
+      onToggleTheme={toggleTheme}
     >
       {store.warning && store.storage.available ? (
         <Alert tone="warning" role="status" onDismiss={store.clearWarning}>
