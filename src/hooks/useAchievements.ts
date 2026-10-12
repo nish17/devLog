@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { Achievement, AchievementInput } from '../types/achievement'
 import {
   loadAchievements,
@@ -18,7 +18,9 @@ export interface UseAchievementsResult {
   clearWarning: () => void
   totalCount: number
   yearCount: number
-  create: (input: AchievementInput) => { ok: true; achievement: Achievement } | { ok: false; error: string }
+  create: (
+    input: AchievementInput,
+  ) => { ok: true; achievement: Achievement } | { ok: false; error: string }
   update: (
     id: string,
     input: AchievementInput,
@@ -30,19 +32,19 @@ export interface UseAchievementsResult {
   getById: (id: string) => Achievement | undefined
 }
 
-export function useAchievements(): UseAchievementsResult {
-  const [achievements, setAchievements] = useState<Achievement[]>([])
-  const [loading, setLoading] = useState(true)
-  const [storage, setStorage] = useState<StorageStatus>({ available: true })
-  const [warning, setWarning] = useState<string | null>(null)
+function readInitial() {
+  return loadAchievements()
+}
 
-  useEffect(() => {
-    const result = loadAchievements()
-    setAchievements(result.achievements)
-    setStorage(result.storage)
-    if (result.warning) setWarning(result.warning)
-    setLoading(false)
-  }, [])
+export function useAchievements(): UseAchievementsResult {
+  const [initial] = useState(readInitial)
+  const [achievements, setAchievements] = useState<Achievement[]>(
+    () => initial.achievements,
+  )
+  const [storage, setStorage] = useState<StorageStatus>(() => initial.storage)
+  const [warning, setWarning] = useState<string | null>(
+    () => initial.warning ?? null,
+  )
 
   const persist = useCallback((next: Achievement[]) => {
     const result = saveAchievements(next)
@@ -144,7 +146,6 @@ export function useAchievements(): UseAchievementsResult {
 
   const replaceAll = useCallback(
     (incoming: Achievement[]) => {
-      // Full replace: ensure IDs are unique within the imported set.
       const withUniqueIds = resolveIdCollisions(incoming, new Set())
       const result = persist(withUniqueIds)
       if (!result.ok) {
@@ -164,7 +165,7 @@ export function useAchievements(): UseAchievementsResult {
   return {
     achievements,
     sorted,
-    loading,
+    loading: false,
     storage,
     warning,
     clearWarning: () => setWarning(null),
